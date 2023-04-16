@@ -1,0 +1,45 @@
+import numpy as np
+from sklearn.datasets import load_digits
+import matplotlib.pyplot as plt
+
+digits = load_digits()
+X = digits.data
+
+k = 10
+max_iter = 100
+centroids = X[np.random.choice(X.shape[0], k, replace=False)]
+objective_values = []
+
+for i in range(max_iter):
+    clusters = [[] for _ in range(k)]
+    for point_idx, point in enumerate(X):
+        closest_centroid_idx = np.argmin([np.linalg.norm(point- centroid) for centroid in centroids])
+        clusters[closest_centroid_idx].append(point_idx)
+    
+    for idx, cluster in enumerate(clusters):
+        if len(cluster) == 0:
+            centroids[idx] = X[np.random.choice(X.shape[0])]
+        else:
+            new_centroid = np.mean(X[cluster], axis=0)
+            centroids[idx] = new_centroid
+    objective_value = 0
+    for idx, cluster in enumerate(clusters):
+        for point_idx in cluster:
+            objective_value += np.linalg.norm(X[point_idx]-centroids[idx])**2
+    objective_values.append(objective_value)
+    
+# Plotting the objective values
+plt.plot(range(max_iter), objective_values)
+plt.xlabel('Number of iter')
+plt.ylabel('Objective value')
+plt.title('K-Means objective value')
+plt.show()
+
+# Show the images corresponding to cluster centers
+fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(8, 4))
+for i in range(len((axes.flat))):
+  aa=axes.flat[i]
+  aa.imshow(centroids[i].reshape(8, 8), cmap='Blues')
+  aa.set_xticks([])
+  aa.set_yticks([])
+plt.show()
